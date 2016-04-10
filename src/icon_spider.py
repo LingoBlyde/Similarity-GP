@@ -54,7 +54,7 @@ class UrlLibIconSpider(IconSpider):
         if not request:
             return None
 
-        retry_times = 3
+        retry_times = 2
         while retry_times >= 0:
             try:
                 response = urllib2.urlopen(request, timeout=30)
