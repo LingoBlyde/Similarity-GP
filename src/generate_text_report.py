@@ -1,9 +1,10 @@
 import csv
 from difflib import SequenceMatcher
+from itertools import product
 
 
 def generate_report(raw_file_name, report_file_name):
-    with open(report_file_name, 'a') as report_file:
+    with open(report_file_name, 'w') as report_file:
         writer = csv.writer(report_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for old, new in read_raw_data(raw_file_name):
             similarity = compute_similarity(old, new)
@@ -22,6 +23,12 @@ def compute_similarity(base_val, comparison_val):
 
 
 def save(writer, row):
+    """
+
+    :param writer:
+    :param row:
+    :return:
+    """
     writer.writerow(row)
 
 
@@ -30,4 +37,4 @@ if __name__ == '__main__':
     report_file_name = '../res/report_name_event.csv'
     generate_report(raw_file_name, report_file_name)
     print 'Succeed to finish.'
-
+    product()

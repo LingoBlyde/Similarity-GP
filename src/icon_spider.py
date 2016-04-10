@@ -34,12 +34,11 @@ class UrlLibIconSpider(IconSpider):
                 response = self._scrape(request)
                 self._parser(response, url)
             except Exception, e:
-                logger.warn('Unknown exception for url %s: exception: %s' % (url, e.message))
+                print 'Unknown exception for url %s: exception: %s' % (url, e.message)
                 self.icon_url_fingerprint_map[url] = None
 
-        logger.info("Scraped total count: %s. succeed:%s, failed:%s" %
-                    (self.scrape_total_count, self.scrape_succeed_count,
-                     self.scrape_total_count - self.scrape_succeed_count))
+        print "Scraped total count: %s. succeed:%s, failed:%s" % (
+            self.scrape_total_count, self.scrape_succeed_count, self.scrape_total_count - self.scrape_succeed_count)
         return self.icon_url_fingerprint_map
 
     @staticmethod
@@ -59,20 +58,20 @@ class UrlLibIconSpider(IconSpider):
         while retry_times >= 0:
             try:
                 response = urllib2.urlopen(request, timeout=30)
-                logger.info('Succeed to scrape url %s' % request.get_full_url())
+                # print 'Succeed to scrape url %s' % request.get_full_url()
                 self.scrape_succeed_count += 1
                 return response
             except urllib2.HTTPError, e:
                 if e.code in [404, ]:
-                    logger.warn('404 to scrape url %s, no need to retry' % request.get_full_url())
-                logger.warn('Failed to scrape url %s, there are %s times to retry' %
-                            (request.get_full_url(), retry_times))
+                    print ('404 to scrape url %s, no need to retry' % request.get_full_url())
+                print ('Failed to scrape url %s, there are %s times to retry' %
+                       (request.get_full_url(), retry_times))
             except socket.timeout:
-                logger.warn('Time out to scrape url %s, there are %s times to retry' %
-                            (request.get_full_url(), retry_times))
+                print ('Time out to scrape url %s, there are %s times to retry' %
+                       (request.get_full_url(), retry_times))
             except IOError:
-                logger.warn('Image for url %s is broken, there are %s times to retry' %
-                            (request.get_full_url(), retry_times))
+                print ('Image for url %s is broken, there are %s times to retry' %
+                       (request.get_full_url(), retry_times))
             finally:
                 retry_times -= 1
                 self.scrape_total_count += 1
@@ -88,6 +87,7 @@ class UrlLibIconSpider(IconSpider):
             self.icon_url_fingerprint_map[url] = image_obj
         except Exception as ex:
             logger.warn(ex.message + ", url : " + url)
+
 
 if __name__ == '__main__':
     icon_spider = UrlLibIconSpider()
