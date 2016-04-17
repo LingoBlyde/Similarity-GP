@@ -32,8 +32,12 @@ def compute_similarity(icon_spider, base_val, comparison_val):
     url_icon_set = icon_spider.scrape({base_val, comparison_val})
     if not any(url_icon_set.values()) or base_val not in url_icon_set or comparison_val not in url_icon_set:
         return 'N/A'
-    similarity = abs(imagehash.dhash(url_icon_set[base_val]) - imagehash.dhash(url_icon_set[comparison_val]))
-    return similarity
+    try:
+        similarity = abs(imagehash.dhash(url_icon_set[base_val]) - imagehash.dhash(url_icon_set[comparison_val]))
+        return similarity
+    except Exception as ex:
+        print ex
+        return 'N/A'
 
 
 def save(writer, row):
@@ -57,7 +61,7 @@ if __name__ == '__main__':
         help='after id'
     )
     args = parser.parse_args()
-    raw_file = 'res/icon/%s.csv' % args.filename
-    report_file = 'res/icon/report_%s.csv' % args.filename
+    raw_file = 'res/icon/ios_icon_%s.csv' % args.filename
+    report_file = 'res/icon/report_ios_icon_%s.csv' % args.filename
     generate_report(args.after, raw_file, report_file)
     print 'Succeed to finish.'
