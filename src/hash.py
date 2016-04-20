@@ -1,6 +1,7 @@
 import PIL
 import numpy
 from PIL import Image
+import scipy.fftpack
 
 
 def different(hash1, hash2):
@@ -26,9 +27,9 @@ def phash(image_obj, hash_size=8):
     image_obj = image_obj.convert("L").resize((hash_size, hash_size), Image.ANTIALIAS)
     pixels = numpy.array(image_obj.getdata(), dtype=numpy.float).reshape((hash_size, hash_size))
     dct = scipy.fftpack.dct(pixels)
-	dctlowfreq = dct[: hash_size, 1: hash_size + 1]
-	avg = dctlowfreq.mean()
-	diff = dctlowfreq > avg
+    dctlowfreq = dct[:hash_size, 1:hash_size+1]
+    avg = dctlowfreq.mean()
+    diff = dctlowfreq > avg
     return diff
 
 
