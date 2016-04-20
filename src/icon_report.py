@@ -21,11 +21,9 @@ def generate_report(raw_file_name, report_file_name):
                 dhash_v = different(dhash(icon_img_dict[d[1]]), dhash(icon_img_dict[d[2]]))
                 phash_v = different(phash(icon_img_dict[d[1]]), phash(icon_img_dict[d[2]]))
             d.extend([dhash_v, phash_v])
-            # print d
             writer.writerow(d)
             print 'ok for {}, dhash: {}, phash: {}'.format(d[0], dhash_v, phash_v)
 
-        stat_dhash, stat_phash = statistics(data)
 
 def read_data(file_name):
     with file(file_name, 'r') as csv_file:
@@ -34,16 +32,6 @@ def read_data(file_name):
         for icon_id, old_val, new_val, _, tag in reader:
             data.append([icon_id, old_val, new_val, tag])
         return data
-
-
-def statistics(data_list):
-    stat_dhash = np.zeros(64)
-    stat_phash = np.zeros(64)
-
-    for icon_id, old_val, new_val, tag, dhash_v, phash_v in data_list:
-        stat_dhash[int(dhash_v)] += 1
-        stat_phash[int(phash_v)] += 1
-    return stat_dhash, stat_phash
 
 
 if __name__ == '__main__':
