@@ -1,5 +1,7 @@
 
 
+
+''''
 def find_threshold(file_name, report_name):
     # example: icon_id, dhash_v, phash_v, tag
     data = read_data(file_name)
@@ -20,3 +22,4 @@ def read_data(file_name):
 
 if __name__ == '__main__':
     find_threshold('res/icon/demo.csv')
+'''
