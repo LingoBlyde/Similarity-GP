@@ -3,8 +3,7 @@ import socket
 import urllib2
 from cStringIO import StringIO
 from PIL import Image as PIL_Image
-
-logger = logging.getLogger(__name__)
+import os
 
 
 class IconSpider(object):
@@ -28,6 +27,7 @@ class UrlLibIconSpider(IconSpider):
         self.scrape_succeed_count = 0
 
     def scrape(self, icon_url_set):
+        self.icon_url_fingerprint_map = {}
         for url in icon_url_set:
             try:
                 request = self._build_request(url)
@@ -57,7 +57,7 @@ class UrlLibIconSpider(IconSpider):
         retry_times = 2
         while retry_times >= 0:
             try:
-                response = urllib2.urlopen(request, timeout=30)
+                response = urllib2.urlopen(request, timeout=90)
                 # print 'Succeed to scrape url %s' % request.get_full_url()
                 self.scrape_succeed_count += 1
                 return response
@@ -86,12 +86,23 @@ class UrlLibIconSpider(IconSpider):
             image_obj = PIL_Image.open(StringIO(image))
             self.icon_url_fingerprint_map[url] = image_obj
         except Exception as ex:
-            logger.warn(ex.message + ", url : " + url)
+            print ex.message, ", parser, url : ", url
 
 
 if __name__ == '__main__':
     icon_spider = UrlLibIconSpider()
-    icons_url_set = {'http://ecx.images-amazon.com/images/I/71TL7Zpu59L._h1_.png',
-                     'http://ecx.images-amazon.com/images/I/7144vK7OFzL._h1_.png'}
+    icons_url_set = {'http://a4.mzstatic.com/us/r1000/025/Purple/84/23/98/mzl.bnbszqhh.75x75-65.jpg',
+                     'http://a1.mzstatic.com/us/r30/Purple/v4/95/94/2b/95942bce-8ab7-552a-5c77-f9ae3f5554ce/icon_75.png'}
+    print 1
     url_image_dict = icon_spider.scrape(icons_url_set)
+    print url_image_dict
+    image_objs = url_image_dict.values()
+    print image_objs
+    if all(image_objs):
+        dir_path = "icons\{id}"
+        img_path = "icons\{id}\{lr}.png"
+        os.mkdir(dir_path.format(id=9999))
+        image_objs[0].save(img_path.format(id=9999, lr='left'))
+        image_objs[1].save(img_path.format(id=9999, lr='ight'))
+
     print url_image_dict
