@@ -1,25 +1,22 @@
 import csv
 import os
-import numpy as np
-from icon_spider import UrlLibIconSpider
+from PIL import Image as PIL_Image
+
 from hash_different import different, dhash, phash
 
 
-def generate_report(raw_file_name, report_file_name):
+def generate_report(dir_path, raw_file_name, report_file_name):
     if os.path.exists(report_file_name):
         os.remove(report_file_name)
 
     with open(report_file_name, 'a') as report_file:
-        writer = csv.writer(report_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        icon_spider = UrlLibIconSpider()
+        writer = csv.writer(report_file, delimiter=',', quotechar='"')
         data = read_data(raw_file_name)
         for d in data:
-            icon_img_dict = icon_spider.scrape({d[1], d[2]})
-            dhash_v = 'N/A'
-            phash_v = 'N/A'
-            if d[1] in icon_img_dict and d[2] in icon_img_dict:
-                dhash_v = different(dhash(icon_img_dict[d[1]]), dhash(icon_img_dict[d[2]]))
-                phash_v = different(phash(icon_img_dict[d[1]]), phash(icon_img_dict[d[2]]))
+            image_obj_left = PIL_Image.open(dir_path + '/{id}/left.png'.format(id=d[0]))
+            image_obj_right = PIL_Image.open(dir_path + '/{id}/ight.png'.format(id=d[0]))
+            dhash_v = different(dhash(image_obj_left), dhash(image_obj_right))
+            phash_v = different(phash(image_obj_left), phash(image_obj_right))
             d.extend([dhash_v, phash_v])
             writer.writerow(d)
             print 'ok for {}, dhash: {}, phash: {}'.format(d[0], dhash_v, phash_v)
@@ -29,10 +26,11 @@ def read_data(file_name):
     with file(file_name, 'r') as csv_file:
         reader = csv.reader(csv_file)
         data = list()
-        for icon_id, old_val, new_val, _, tag in reader:
-            data.append([icon_id, old_val, new_val, tag])
+        for icon_id, tag in reader:
+            data.append([icon_id, tag])
         return data
 
 
 if __name__ == '__main__':
-    generate_report('res/icon/icon_analytical_data.csv', 'res/icon/icon_analytical_report.csv')
+    dir_path = 'd:/workspace/workspace/icons'
+    generate_report(dir_path, 'res/icon/ids.csv', 'res/icon/ids_hash_report.csv')
