@@ -20,39 +20,102 @@
 
 import csv
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 
 
-def find_threshold(file_name):
-    # example: icon_id, dhash_v, phash_v, tag
-    data = read_data(file_name)
-    x_same, y_same = [], []
-    x_different, y_different = [], []
-    for d in data:
-        if d[3] == 'same':
-            x, y = x_same, y_same
+def plotBestFit(dataMat, labelMat, weights=[1,1,1]):
+    n = np.shape(dataMat)[0]
+    xcord1 = []; ycord1 = []
+    xcord2 = []; ycord2 = []
+    for i in range(n):
+        if labelMat[i] == 1:
+            xcord1.append(dataMat[i,1]); ycord1.append(dataMat[i,2])
         else:
-            x, y = x_different, y_different
-        x.append(int(d[1]))
-        y.append(int(d[2]))
-
-    plt.scatter(x_same, y_same, color='green', marker='o')
-    plt.scatter(x_different, y_different, color='red',marker='D')
+            xcord2.append(dataMat[i,1]); ycord2.append(dataMat[i,2])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(xcord1, ycord1, s=25, c='yellow', marker='s')
+    ax.scatter(xcord2, ycord2, s=25, c='red')
+    x = np.arange(-1.0, 7.0, 0.1)
+    y = (-weights[0] - weights[1] * x) / weights[2]
+    ax.plot(x, y)
+    plt.xlabel('X1')
+    plt.ylabel('X2')
     plt.show()
 
 
+def sigmoid(inX):
+    sig = 1.0 / (1 + math.exp(-inX))
+    return sig
 
-# def sigmoid(inX):
-#     return 1.0/(1+exp(-inX))
+
+def stocGradAscent0(dataMat, labelMat):
+    m, n = np.shape(dataMat)
+    alpha = 0.01
+    weights = np.ones(n)   #initialize to all ones
+    for i in range(m):
+        h = sigmoid(sum(dataMat[i] * weights))
+        error = labelMat[i] - h
+        weights = weights + alpha * error * dataMat[i]
+    return weights
 
 
-def read_data(file_name):
+def classifyVector(inX, weights):
+    prob = sigmoid(sum(inX * weights))
+    if prob > 0.5:
+        return 1.0
+    else:
+        return 0.0
+
+
+def colicTest(dataMat, labelMat):
+    trainWeights = stocGradAscent0(dataMat, labelMat)
+    errorCount = 0
+    numTestVec = len(dataMat)
+    for arr, label in zip(dataMat, labelMat):
+        if int(classifyVector(arr, trainWeights)) != label:
+            errorCount += 1
+    errorRate = (float(errorCount) / numTestVec)
+    print "the error rate of this test is: %f" % errorRate
+    return errorRate
+
+
+def multiTest(dataMat, labelMat):
+    numTests = 5
+    errorSum = 0.0
+    for k in range(numTests):
+        errorSum += colicTest(dataMat, labelMat)
+    print "after %d iterations the average error rate is: %f" % (numTests, errorSum/float(numTests))
+
+
+def loadDataSet_hash(file_name):
     with file(file_name, 'r') as csv_file:
         reader = csv.reader(csv_file)
-        data = list()
-        for icon_id, dhash_v, phash_v, tag in reader:
-            data.append((icon_id, dhash_v, phash_v, tag))
-        return data
+        dataMat = list()
+        labelMat = list()
+        for icon_id, tag, dhash_v, phash_v in reader:
+            dataMat.append([1.0, float(dhash_v), float(phash_v)])
+            labelMat.append(1) if tag == 'same' else labelMat.append(0)
+        return np.array(dataMat), labelMat
+
+
+def loadDataSet_diff(file_name):
+    with file(file_name, 'r') as csv_file:
+        reader = csv.reader(csv_file)
+        dataMat = list()
+        labelMat = list()
+        for icon_id, tag, diff in reader:
+            dataMat.append([1.0, float(diff)])
+            labelMat.append(1) if tag == 'same' else labelMat.append(0)
+        return np.array(dataMat), labelMat
+
 
 if __name__ == '__main__':
-    find_threshold('res/icon/train_datas.csv')
+    # dataMat, labelMat = loadDataSet('res/icon/ids_hash_report.csv')
+    dataMat, labelMat = loadDataSet_diff('res/icon/ids_diff_report.csv')
+    multiTest(dataMat, labelMat)
+
+    # weights = stocGradAscent0(dataMat, labelMat)
+    # print weights
+    # plotBestFit(dataMat, labelMat, weights)

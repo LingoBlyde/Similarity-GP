@@ -3,6 +3,7 @@ import os
 from PIL import Image as PIL_Image
 
 from hash_different import different, dhash, phash
+from image_different import image_different
 
 
 def generate_report(dir_path, raw_file_name, report_file_name):
@@ -15,11 +16,23 @@ def generate_report(dir_path, raw_file_name, report_file_name):
         for d in data:
             image_obj_left = PIL_Image.open(dir_path + '/{id}/left.png'.format(id=d[0]))
             image_obj_right = PIL_Image.open(dir_path + '/{id}/ight.png'.format(id=d[0]))
-            dhash_v = different(dhash(image_obj_left), dhash(image_obj_right))
-            phash_v = different(phash(image_obj_left), phash(image_obj_right))
-            d.extend([dhash_v, phash_v])
+            # hash_different(image_obj_left, image_obj_right, d)
+            img_different(image_obj_left, image_obj_right, d)
+
             writer.writerow(d)
-            print 'ok for {}, dhash: {}, phash: {}'.format(d[0], dhash_v, phash_v)
+
+
+def hash_different(image_obj_left, image_obj_right, d):
+    dhash_v = different(dhash(image_obj_left), dhash(image_obj_right))
+    phash_v = different(phash(image_obj_left), phash(image_obj_right))
+    d.extend([dhash_v, phash_v])
+    print 'ok for {}, dhash: {}, phash: {}'.format(d[0], dhash_v, phash_v)
+
+
+def img_different(image_obj_left, image_obj_right, d):
+    diff = image_different(image_obj_left, image_obj_right)
+    d.append(diff)
+    print 'ok for {}, diff: {}'.format(d[0], diff)
 
 
 def read_data(file_name):
@@ -33,4 +46,4 @@ def read_data(file_name):
 
 if __name__ == '__main__':
     dir_path = 'd:/workspace/workspace/icons'
-    generate_report(dir_path, 'res/icon/ids.csv', 'res/icon/ids_hash_report.csv')
+    generate_report(dir_path, 'res/icon/ids.csv', 'res/icon/ids_diff_report.csv')
