@@ -3,10 +3,10 @@ import os
 from PIL import Image as PIL_Image
 
 from hash_different import different, dhash, phash
-from image_different import image_different
+from pixel_different import pixel_different
 
 
-def generate_report(dir_path, raw_file_name, report_file_name):
+def generate_report(dir_path, raw_file_name, report_file_name, threshold):
     if os.path.exists(report_file_name):
         os.remove(report_file_name)
 
@@ -17,7 +17,7 @@ def generate_report(dir_path, raw_file_name, report_file_name):
             image_obj_left = PIL_Image.open(dir_path + '/{id}/left.png'.format(id=d[0]))
             image_obj_right = PIL_Image.open(dir_path + '/{id}/ight.png'.format(id=d[0]))
             # hash_different(image_obj_left, image_obj_right, d)
-            img_different(image_obj_left, image_obj_right, d)
+            img_different(image_obj_left, image_obj_right, threshold, d)
 
             writer.writerow(d)
 
@@ -29,8 +29,8 @@ def hash_different(image_obj_left, image_obj_right, d):
     print 'ok for {}, dhash: {}, phash: {}'.format(d[0], dhash_v, phash_v)
 
 
-def img_different(image_obj_left, image_obj_right, d):
-    diff = image_different(image_obj_left, image_obj_right)
+def img_different(image_obj_left, image_obj_right, threshold, d):
+    diff = pixel_different(image_obj_left, image_obj_right, gray=True, threshold=threshold)
     d.append(diff)
     print 'ok for {}, diff: {}'.format(d[0], diff)
 
@@ -46,4 +46,7 @@ def read_data(file_name):
 
 if __name__ == '__main__':
     dir_path = 'd:/workspace/workspace/icons'
-    generate_report(dir_path, 'res/icon/ids.csv', 'res/icon/ids_diff_report.csv')
+    for i in range(5, 11):
+        print 'start {} file'.format(i)
+        generate_report(dir_path, 'res/icon/ids.csv',
+                        'res/icon/ids_diff_gray_{}_report.csv'.format(i), i)

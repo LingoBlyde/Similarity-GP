@@ -70,10 +70,12 @@ def classifyVector(inX, weights):
 
 
 def colicTest(dataMat, labelMat):
-    trainWeights = stocGradAscent0(dataMat, labelMat)
+    m, n = np.shape(dataMat)
+    trainWeights = stocGradAscent0(dataMat[:int(0.5*m)], labelMat[:int(0.5*m)])
+    print trainWeights
     errorCount = 0
     numTestVec = len(dataMat)
-    for arr, label in zip(dataMat, labelMat):
+    for arr, label in zip(dataMat[int(0.5*m):], labelMat[int(0.5*m):]):
         if int(classifyVector(arr, trainWeights)) != label:
             errorCount += 1
     errorRate = (float(errorCount) / numTestVec)
@@ -112,8 +114,8 @@ def loadDataSet_diff(file_name):
 
 
 if __name__ == '__main__':
-    # dataMat, labelMat = loadDataSet('res/icon/ids_hash_report.csv')
-    dataMat, labelMat = loadDataSet_diff('res/icon/ids_diff_report.csv')
+    dataMat, labelMat = loadDataSet_hash('res/icon/ids_hash_report.csv')
+    dataMat, labelMat = loadDataSet_diff('res/icon/ids_dhash_report.csv')
     multiTest(dataMat, labelMat)
 
     # weights = stocGradAscent0(dataMat, labelMat)
